@@ -1,15 +1,16 @@
 const express = require('express');
 const multer = require('multer');
 const speech = require('@google-cloud/speech');
+const workoutController = require('./workoutController');
 const dotenv = require('dotenv');
 const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process'); // Import exec to run ffmpeg
+const cors = require('cors');
 
 dotenv.config();
 
 const app = express();
-const cors = require('cors');
 app.use(cors());
 
 // Configure multer to save uploaded files in 'uploads/' directory
@@ -37,13 +38,33 @@ const convertToWav = (inputPath, outputPath) => {
   });
 };
 
+// Function to parse transcription and extract workout data
+function parseTranscription(transcription) {
+  const lowerInput = transcription.toLowerCase();
+  const exerciseRegex = /([a-zA-Z\s]+)(?=set|reps|pounds)/;
+  const repsRegex = /(\d+)\sreps/;
+  const setRegex = /set\s(\d+)/;
+  const weightRegex = /(\d+)\spounds/;
+
+  const exerciseMatch = lowerInput.match(exerciseRegex);
+  const repsMatch = lowerInput.match(repsRegex);
+  const setMatch = lowerInput.match(setRegex);
+  const weightMatch = lowerInput.match(weightRegex);
+
+  return {
+    exercise: exerciseMatch ? (exerciseMatch[1] || '').trim() : '',
+    reps: repsMatch ? repsMatch[1] : '',
+    sets: setMatch ? setMatch[1] : '',
+    weight: weightMatch ? weightMatch[1] : '',
+    timestamp: new Date().toISOString(),
+  };
+}
 
 // Endpoint for transcribing audio
 app.post('/transcribe', upload.single('audio'), async (req, res) => {
-  console.log('Received file:', req.file);
-
   try {
-    // Ensure file exists
+    console.log('Received file:', req.file);
+
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
     }
@@ -75,6 +96,13 @@ app.post('/transcribe', upload.single('audio'), async (req, res) => {
       .join('\n');
 
     console.log(`Transcription: ${transcription}`);
+
+    // Parse transcription and prepare workout data
+    const workoutData = parseTranscription(transcription);
+
+    // Add workout to Firestore
+    await workoutController.addWorkout(workoutData);
+
     res.json({ transcription });
 
     // Clean up: Remove files after processing

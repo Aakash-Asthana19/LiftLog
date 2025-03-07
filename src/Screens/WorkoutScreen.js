@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { Audio } from 'expo-av';
 import * as mime from 'react-native-mime-types';
-import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesome } from '@expo/vector-icons'; // Import FontAwesome icons
 
 const WorkoutScreen = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -70,7 +70,7 @@ const WorkoutScreen = () => {
         name: fileName,
       });
 
-      const response = await fetch('http://128.61.8.46:3000/transcribe', {
+      const response = await fetch('http://128.61.13.238:3000/transcribe', {
         method: 'POST',
         body: formData,
         headers: {
@@ -97,22 +97,26 @@ const WorkoutScreen = () => {
   };
 
   const parseVoiceInput = (input) => {
+    if (!input) return { exercise: '', reps: '', sets: '', weight: '' }; //null input
+
     const lowerInput = input.toLowerCase();
-    const exerciseRegex = /([a-zA-Z\s]+)/;
-    const repsRegex = /(\d+)\sreps/;
-    const setRegex = /set\s(\d+)/;
-    const weightRegex = /(\d+)\spounds/;
+
+    // Regex patterns to extract information
+    const exerciseRegex = /([a-zA-Z\s]+)(?=\d+\sreps|set|pounds)/; // Capture exercise name before reps, set, or pounds
+    const repsRegex = /(\d+)\sreps/; // Capture number followed by "reps"
+    const setRegex = /set\s(\d+)/; // Capture number after "set"
+    const weightRegex = /(\d+)\spounds/; // Capture number followed by "pounds"
 
     const exerciseMatch = lowerInput.match(exerciseRegex);
-    const repsMatch = repsRegex ? lowerInput.match(repsRegex) : workout.reps;
-    const setMatch = setRegex ? lowerInput.match(setRegex) : workout.sets;
-    const weightMatch = weightRegex ? weightMatch[1] : workout.weight;
+    const repsMatch = lowerInput.match(repsRegex);
+    const setMatch = lowerInput.match(setRegex);
+    const weightMatch = lowerInput.match(weightRegex);
 
     setWorkout({
-      exercise: exerciseMatch ? (exerciseMatch[1] || '').trim() : workout.exercise,
-      reps: repsMatch ? (repsMatch[1] || '') : workout.reps,
-      sets: setMatch ? (setMatch[1] || '') : workout.sets,
-      weight: weightMatch ? (weightMatch[1] || '') : workout.weight,
+      exercise: exerciseMatch ? exerciseMatch[1].trim() : workout.exercise,
+      reps: repsMatch ? repsMatch[1] : workout.reps,
+      sets: setMatch ? setMatch[1] : workout.sets,
+      weight: weightMatch ? weightMatch[1] : workout.weight,
     });
   };
 
@@ -125,7 +129,7 @@ const WorkoutScreen = () => {
         <View style={styles.container}>
           {/* Translucent Mic Background */}
           <Image
-            source={require('../../assets/mic_background.png')}
+            source={require('../../assets/mic_background.png')} //image path to mic background
             style={styles.backgroundImage}
           />
 
