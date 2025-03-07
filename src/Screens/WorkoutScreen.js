@@ -1,7 +1,19 @@
 import React, { useState } from 'react';
-import { View, Text, Button, StyleSheet, TextInput } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from 'react-native';
 import { Audio } from 'expo-av';
 import * as mime from 'react-native-mime-types';
+import { FontAwesome } from '@expo/vector-icons'; // Import FontAwesome icons
 
 const WorkoutScreen = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -57,17 +69,14 @@ const WorkoutScreen = () => {
         type: mimeType,
         name: fileName,
       });
-      
-      const IPAddress = ''; // MODIFY WITH YOUR IP ADDRESS!!!!
 
-      const response = await fetch(`http://${IPAddress}:3000/transcribe`, {
+      const response = await fetch('http://128.61.8.46:3000/transcribe', {
         method: 'POST',
         body: formData,
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-      
 
       const data = await response.json();
 
@@ -95,62 +104,90 @@ const WorkoutScreen = () => {
     const weightRegex = /(\d+)\spounds/;
 
     const exerciseMatch = lowerInput.match(exerciseRegex);
-    const repsMatch = lowerInput.match(repsRegex);
-    const setMatch = lowerInput.match(setRegex);
-    const weightMatch = lowerInput.match(weightRegex);
+    const repsMatch = repsRegex ? lowerInput.match(repsRegex) : workout.reps;
+    const setMatch = setRegex ? lowerInput.match(setRegex) : workout.sets;
+    const weightMatch = weightRegex ? weightMatch[1] : workout.weight;
 
     setWorkout({
       exercise: exerciseMatch ? (exerciseMatch[1] || '').trim() : workout.exercise,
-      reps: repsMatch ? repsMatch[1] : workout.reps,
-      sets: setMatch ? setMatch[1] : workout.sets,
-      weight: weightMatch ? weightMatch[1] : workout.weight,
+      reps: repsMatch ? (repsMatch[1] || '') : workout.reps,
+      sets: setMatch ? (setMatch[1] || '') : workout.sets,
+      weight: weightMatch ? (weightMatch[1] || '') : workout.weight,
     });
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Log Workout</Text>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <View style={styles.container}>
+          {/* Translucent Mic Background */}
+          <Image
+            source={require('../../assets/mic_background.png')} // Replace with your image path
+            style={styles.backgroundImage}
+          />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Exercise"
-        value={workout.exercise}
-        onChangeText={(text) => handleInputChange('exercise', text)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Reps"
-        value={workout.reps}
-        onChangeText={(text) => handleInputChange('reps', text)}
-        keyboardType="numeric"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Sets"
-        value={workout.sets}
-        onChangeText={(text) => handleInputChange('sets', text)}
-        keyboardType="numeric"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Weight (lbs)"
-        value={workout.weight}
-        onChangeText={(text) => handleInputChange('weight', text)}
-        keyboardType="numeric"
-      />
+          <View style={styles.header}>
+            <Text style={styles.title}>Lift-Log</Text>
+            <Text style={styles.subtitle}>Text-to-Speech Activated</Text>
+          </View>
 
-      <Button
-        title={isRecording ? 'Stop Recording' : 'Start Recording'}
-        onPress={isRecording ? stopRecording : startRecording}
-      />
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder={workout.exercise || "Exercise Name"}
+              placeholderTextColor={'gray'}
+              value={workout.exercise}
+              onChangeText={(text) => handleInputChange('exercise', text)}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder={workout.sets || "Set #"}
+              placeholderTextColor={'gray'}
+              value={workout.sets}
+              onChangeText={(text) => handleInputChange('sets', text)}
+              keyboardType="numeric"
+            />
+            <TextInput
+              style={styles.input}
+              placeholder={workout.reps || "Reps #"}
+              placeholderTextColor={'gray'}
+              value={workout.reps}
+              onChangeText={(text) => handleInputChange('reps', text)}
+              keyboardType="numeric"
+            />
+            <TextInput
+              style={styles.input}
+              placeholder={workout.weight || "Weight (lbs)"}
+              placeholderTextColor={'gray'}
+              value={workout.weight}
+              onChangeText={(text) => handleInputChange('weight', text)}
+              keyboardType="numeric"
+            />
+          </View>
 
-      {transcription && (
-        <View style={styles.transcriptionContainer}>
-          <Text style={styles.transcriptionTitle}>Transcription:</Text>
-          <Text style={styles.transcription}>{transcription}</Text>
+          <TouchableOpacity
+            style={[styles.recordButton, isRecording ? styles.recording : null]}
+            onPress={isRecording ? stopRecording : startRecording}
+          >
+            <FontAwesome
+              name="microphone"
+              size={24}
+              color="white"
+            />
+          </TouchableOpacity>
+
+          {transcription && (
+            <View style={styles.transcriptionContainer}>
+              <Text style={styles.transcriptionTitle}>Transcription:</Text>
+              <Text style={styles.transcription}>{transcription}</Text>
+            </View>
+          )}
         </View>
-      )}
-    </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -159,29 +196,67 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+  backgroundImage: {
+    position: 'absolute',
+    left: 0,
+    width: '100%',
+    height: '100%',
+    opacity: 0.1,
+  },
+  header: {
+    marginTop: 50,
+    alignItems: 'center',
   },
   title: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
+  },
+  subtitle: {
+    fontSize: 18,
+    marginBottom: 20,
+    color: '#666',
+  },
+  inputContainer: {
+    width: '100%',
     marginBottom: 20,
   },
   input: {
     height: 40,
-    borderColor: 'gray',
+    borderColor: '#ccc',
     borderWidth: 1,
     marginBottom: 10,
     paddingHorizontal: 10,
+    borderRadius: 8,
+    backgroundColor: '#f9f9f9',
+  },
+  recordButton: {
+    backgroundColor: '#5dade2',
+    padding: 15,
+    borderRadius: 30,
+    marginBottom: 20,
+  },
+  recording: {
+    backgroundColor: 'red',
   },
   transcriptionContainer: {
     marginTop: 20,
+    alignItems: 'center',
   },
   transcriptionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
   },
   transcription: {
     fontSize: 16,
-    marginTop: 10,
+    color: '#555',
+    textAlign: 'center',
   },
 });
 
