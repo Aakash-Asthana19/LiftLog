@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { Audio } from 'expo-av';
 import * as mime from 'react-native-mime-types';
-import { FontAwesome } from '@expo/vector-icons'; // Import FontAwesome icons
+import { FontAwesome } from '@expo/vector-icons';
 
 const WorkoutScreen = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -125,7 +125,7 @@ const WorkoutScreen = () => {
         <View style={styles.container}>
           {/* Translucent Mic Background */}
           <Image
-            source={require('../../assets/mic_background.png')} // Replace with your image path
+            source={require('../../assets/mic_background.png')}
             style={styles.backgroundImage}
           />
 
