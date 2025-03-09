@@ -2,7 +2,8 @@ const db = require('./firebase');
 
 const workoutCollection = db.collection('workouts');
 
-// Function to add a new workout
+//CRUD operations (create, read, update, delete)
+
 async function addWorkout(workoutData) {
   try {
     const docRef = await workoutCollection.add(workoutData);
@@ -12,7 +13,6 @@ async function addWorkout(workoutData) {
   }
 }
 
-// Function to get all workouts
 async function getAllWorkouts() {
   try {
     const querySnapshot = await workoutCollection.get();
@@ -23,7 +23,6 @@ async function getAllWorkouts() {
   }
 }
 
-// Function to update a workout
 async function updateWorkout(workoutId, updatedData) {
   try {
     await workoutCollection.doc(workoutId).update(updatedData);
@@ -33,7 +32,6 @@ async function updateWorkout(workoutId, updatedData) {
   }
 }
 
-// Function to delete a workout
 async function deleteWorkout(workoutId) {
   try {
     await workoutCollection.doc(workoutId).delete();

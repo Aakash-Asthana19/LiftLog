@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { Audio } from 'expo-av';
 import * as mime from 'react-native-mime-types';
-import { FontAwesome } from '@expo/vector-icons'; // Import FontAwesome icons
+import { FontAwesome } from '@expo/vector-icons';
 
 const WorkoutScreen = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -70,7 +70,7 @@ const WorkoutScreen = () => {
         name: fileName,
       });
 
-      const response = await fetch('http://128.61.13.238:3000/transcribe', {
+      const response = await fetch('http://10.2.95.28:3000/transcribe', { //update with your IP ADDRESS
         method: 'POST',
         body: formData,
         headers: {
@@ -101,11 +101,11 @@ const WorkoutScreen = () => {
 
     const lowerInput = input.toLowerCase();
 
-    // Regex patterns to extract information
-    const exerciseRegex = /([a-zA-Z\s]+)(?=\d+\sreps|set|pounds)/; // Capture exercise name before reps, set, or pounds
-    const repsRegex = /(\d+)\sreps/; // Capture number followed by "reps"
-    const setRegex = /set\s(\d+)/; // Capture number after "set"
-    const weightRegex = /(\d+)\spounds/; // Capture number followed by "pounds"
+    //command must be said in a certain way as of now
+    const exerciseRegex = /([a-zA-Z\s]+)(?=\d+\sreps|set|pounds)/; //get exercise name before reps, set, or pounds
+    const repsRegex = /(\d+)\sreps/; //get number followed by "reps"
+    const setRegex = /set\s(\d+)/; //get number after "set"
+    const weightRegex = /(\d+)\spounds/; //get number followed by "pounds"
 
     const exerciseMatch = lowerInput.match(exerciseRegex);
     const repsMatch = lowerInput.match(repsRegex);

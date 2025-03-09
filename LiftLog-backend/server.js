@@ -5,7 +5,7 @@ const workoutController = require('./workoutController');
 const dotenv = require('dotenv');
 const fs = require('fs');
 const path = require('path');
-const { exec } = require('child_process'); // Import exec to run ffmpeg
+const { exec } = require('child_process'); //for ffmepeg
 const cors = require('cors');
 
 dotenv.config();
@@ -13,18 +13,16 @@ dotenv.config();
 const app = express();
 app.use(cors());
 
-// Configure multer to save uploaded files in 'uploads/' directory
 const upload = multer({ dest: 'uploads/' });
 
-// Initialize Google Cloud Speech client
+//Google Cloud Speech client
 const client = new speech.SpeechClient({
   keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
 });
 
-// Function to convert m4a to wav
+//convert m4a to wav
 const convertToWav = (inputPath, outputPath) => {
   return new Promise((resolve, reject) => {
-    // Enclose inputPath in quotes to handle spaces
     const command = `ffmpeg -i "${inputPath}" -ar 16000 -ac 1 -c:a pcm_s16le "${outputPath}"`;
     exec(command, (error, stdout, stderr) => {
       if (error) {
@@ -38,7 +36,7 @@ const convertToWav = (inputPath, outputPath) => {
   });
 };
 
-// Function to parse transcription and extract workout data
+//same parse logic as in WorkoutScreen.js
 function parseTranscription(transcription) {
   const lowerInput = transcription.toLowerCase();
   const exerciseRegex = /([a-zA-Z\s]+)(?=set|reps|pounds)/;
@@ -60,7 +58,7 @@ function parseTranscription(transcription) {
   };
 }
 
-// Endpoint for transcribing audio
+//endpoint for transcribing audio
 app.post('/transcribe', upload.single('audio'), async (req, res) => {
   try {
     console.log('Received file:', req.file);
@@ -72,13 +70,12 @@ app.post('/transcribe', upload.single('audio'), async (req, res) => {
     const inputPath = path.resolve(req.file.path);
     const outputPath = inputPath + '.wav';
 
-    // Convert to wav
+    //convert to .wav
     await convertToWav(inputPath, outputPath);
 
-    // Read the converted wav file
     const audioBytes = fs.readFileSync(outputPath).toString('base64');
 
-    // Configure request for Google Cloud Speech-to-Text API
+    //request for Google Cloud Speech-to-Text API
     const audio = { content: audioBytes };
     const config = {
       encoding: 'LINEAR16',
@@ -87,10 +84,9 @@ app.post('/transcribe', upload.single('audio'), async (req, res) => {
     };
     const request = { audio, config };
 
-    // Send request to Google Cloud Speech-to-Text API
     const [response] = await client.recognize(request);
 
-    // Process transcription response
+    //transcription response
     const transcription = response.results
       .map(result => result.alternatives[0].transcript)
       .join('\n');
@@ -100,12 +96,12 @@ app.post('/transcribe', upload.single('audio'), async (req, res) => {
     // Parse transcription and prepare workout data
     const workoutData = parseTranscription(transcription);
 
-    // Add workout to Firestore
+    //add workout to Firebase
     await workoutController.addWorkout(workoutData);
 
     res.json({ transcription });
 
-    // Clean up: Remove files after processing
+    //Remove files after processing for storage
     fs.unlinkSync(inputPath);
     fs.unlinkSync(outputPath);
   } catch (error) {
@@ -114,7 +110,7 @@ app.post('/transcribe', upload.single('audio'), async (req, res) => {
   }
 });
 
-// Start server
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
