@@ -14,6 +14,7 @@ import {
 import { Audio } from 'expo-av';
 import * as mime from 'react-native-mime-types';
 import { FontAwesome } from '@expo/vector-icons';
+import { analytics } from '../../firebaseClient';
 
 const WorkoutScreen = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -33,12 +34,14 @@ const WorkoutScreen = () => {
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
       });
-
+  
       const { recording } = await Audio.Recording.createAsync(
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
       setRecording(recording);
       setIsRecording(true);
+      
+      await analytics().logEvent('start_recording'); //log to record for analytics
     } catch (err) {
       console.error('Failed to start recording', err);
     }
@@ -50,7 +53,8 @@ const WorkoutScreen = () => {
       await recording.stopAndUnloadAsync();
       const uri = recording.getURI();
       console.log('Recording saved at:', uri);
-
+      
+      await analytics().logEvent('stop_recording'); //log to record for analytics
       processAudioToText(uri);
     } catch (err) {
       console.error('Failed to stop recording', err);
@@ -70,7 +74,7 @@ const WorkoutScreen = () => {
         name: fileName,
       });
 
-      const response = await fetch('http://10.2.95.28:3000/transcribe', { //update with your IP ADDRESS
+      const response = await fetch('http://128.61.14.189:3000/transcribe', { //update with your IP ADDRESS
         method: 'POST',
         body: formData,
         headers: {

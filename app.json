@@ -1,5 +1,9 @@
 {
   "expo": {
+    "plugins": [
+      "@react-native-firebase/app",
+      "@react-native-firebase/analytics"
+    ],
     "name": "LiftLog",
     "slug": "LiftLog",
     "version": "1.0.0",
