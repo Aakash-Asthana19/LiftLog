@@ -14,8 +14,10 @@ import {
 import { Audio } from 'expo-av';
 import * as mime from 'react-native-mime-types';
 import { FontAwesome } from '@expo/vector-icons';
-// import { analytics } from '../../firebase-config';
-import * as Analytics from 'expo-firebase-analytics';
+// import * as Analytics from 'expo-firebase-analytics';
+import { getAnalytics, logEvent } from "firebase/analytics";
+import { initializeApp } from "firebase/app";
+import firebaseConfig from '../../firebase-config';
 
 
 const WorkoutScreen = () => {
@@ -28,6 +30,9 @@ const WorkoutScreen = () => {
     sets: '',
     weight: '',
   });
+
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
 
   const startRecording = async () => {
     try {
@@ -43,7 +48,7 @@ const WorkoutScreen = () => {
       setRecording(recording);
       setIsRecording(true);
       
-      await Analytics.logEvent('start_recording');
+      logEvent(analytics, 'start_recording');
     } catch (err) {
       console.error('Failed to start recording', err);
     }
@@ -56,7 +61,7 @@ const WorkoutScreen = () => {
       const uri = recording.getURI();
       console.log('Recording saved at:', uri);
       
-      await Analytics.logEvent('stop_recording');
+      logEvent(analytics, 'start_recording');
       processAudioToText(uri);
     } catch (err) {
       console.error('Failed to stop recording', err);

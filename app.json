@@ -1,19 +1,6 @@
 {
   "expo": {
-    "plugins": [
-      [
-        "expo-firebase-analytics",
-        {
-          "apiKey": "AIzaSyCYLGNvOtPHyXeQF6IRK2OXLQM9a2vtgNs",
-          "authDomain": "eloquent-hold-452818-d3.firebaseapp.com",
-          "projectId": "eloquent-hold-452818-d3",
-          "storageBucket": "eloquent-hold-452818-d3.firebasestorage.app",
-          "messagingSenderId": "842237190744",
-          "appId": "1:842237190744:web:7516f11e03b87b1ae0e02d",
-          "measurementId": "G-0L5TQ8JM9L"
-        }
-      ]
-    ],
+    "plugins": [],
     "name": "LiftLog",
     "slug": "LiftLog",
     "version": "1.0.0",
