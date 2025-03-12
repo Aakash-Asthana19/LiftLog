@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,11 +14,8 @@ import {
 import { Audio } from 'expo-av';
 import * as mime from 'react-native-mime-types';
 import { FontAwesome } from '@expo/vector-icons';
-// import * as Analytics from 'expo-firebase-analytics';
-import { getAnalytics, logEvent } from "firebase/analytics";
-import { initializeApp } from "firebase/app";
-import firebaseConfig from '../../firebase-config';
-
+import { getAnalytics, isSupported, logEvent } from "firebase/analytics";
+import { getApp } from "firebase/app";
 
 const WorkoutScreen = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -31,9 +28,6 @@ const WorkoutScreen = () => {
     weight: '',
   });
 
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-
   const startRecording = async () => {
     try {
       await Audio.requestPermissionsAsync();
@@ -41,14 +35,21 @@ const WorkoutScreen = () => {
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
       });
-  
+
       const { recording } = await Audio.Recording.createAsync(
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
       setRecording(recording);
       setIsRecording(true);
       
-      logEvent(analytics, 'start_recording');
+      try {
+        const analytics = await initializeAnalytics();
+        if (analytics) {
+          logEvent(analytics, 'start_recording'); // or 'stop_recording'
+        }
+      } catch (analyticsError) {
+        console.error('Analytics error:', analyticsError);
+      }
     } catch (err) {
       console.error('Failed to start recording', err);
     }
@@ -61,7 +62,15 @@ const WorkoutScreen = () => {
       const uri = recording.getURI();
       console.log('Recording saved at:', uri);
       
-      logEvent(analytics, 'start_recording');
+      try {
+        const analytics = await initializeAnalytics();
+        if (analytics) {
+          logEvent(analytics, 'stop_recording'); // or 'stop_recording'
+        }
+      } catch (analyticsError) {
+        console.error('Analytics error:', analyticsError);
+      }
+      
       processAudioToText(uri);
     } catch (err) {
       console.error('Failed to stop recording', err);
@@ -108,7 +117,7 @@ const WorkoutScreen = () => {
   };
 
   const parseVoiceInput = (input) => {
-    if (!input) return { exercise: '', reps: '', sets: '', weight: '' }; //null input
+    if (!input) return; // Check if input is not null or undefined
 
     const lowerInput = input.toLowerCase();
 
@@ -140,7 +149,7 @@ const WorkoutScreen = () => {
         <View style={styles.container}>
           {/* Translucent Mic Background */}
           <Image
-            source={require('../../assets/mic_background.png')} //image path to mic background
+            source={require('../../assets/mic_background.png')}
             style={styles.backgroundImage}
           />
 

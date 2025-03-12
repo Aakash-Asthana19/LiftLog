@@ -1,14 +1,24 @@
 import React, { useEffect } from 'react';
-import { initializeApp } from "firebase/app";
-import { getAnalytics, logEvent } from "firebase/analytics";
+import { app, initializeAnalytics } from "./firebase-config";
+import { logEvent } from "firebase/analytics";
 import WorkoutScreen from './src/Screens/WorkoutScreen.js';
-import firebaseConfig from './firebase-config';
 
 export default function App() {
   useEffect(() => {
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-    logEvent(analytics, 'app_open');
+    const setupAnalytics = async () => {
+      try {
+        const analytics = await initializeAnalytics();
+        if (analytics) {
+          logEvent(analytics, 'app_open');
+        } else {
+          console.log('Analytics not supported in this environment');
+        }
+      } catch (error) {
+        console.error('Analytics initialization error:', error);
+      }
+    };
+    
+    setupAnalytics();
   }, []);
 
   return <WorkoutScreen />;
