@@ -45,7 +45,7 @@ const WorkoutScreen = () => {
       try {
         const analytics = await initializeAnalytics();
         if (analytics) {
-          logEvent(analytics, 'start_recording'); // or 'stop_recording'
+          logEvent(analytics, 'start_recording');
         }
       } catch (analyticsError) {
         console.error('Analytics error:', analyticsError);
@@ -65,7 +65,7 @@ const WorkoutScreen = () => {
       try {
         const analytics = await initializeAnalytics();
         if (analytics) {
-          logEvent(analytics, 'stop_recording'); // or 'stop_recording'
+          logEvent(analytics, 'stop_recording');
         }
       } catch (analyticsError) {
         console.error('Analytics error:', analyticsError);

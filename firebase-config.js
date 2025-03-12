@@ -12,10 +12,9 @@ const firebaseConfig = {
   measurementId: "G-0L5TQ8JM9L"
 };
 
-// Initialize Firebase only if it hasn't been initialized yet
+//Initialize Firebase only if it hasn't been initialized yet
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-// Initialize analytics only if supported
 const initializeAnalytics = async () => {
   try {
     const analyticsSupported = await isSupported();
