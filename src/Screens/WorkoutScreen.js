@@ -90,7 +90,7 @@ const WorkoutScreen = () => {
         name: fileName,
       });
 
-      const response = await fetch('http://128.61.14.189:3000/transcribe', { //update with your IP ADDRESS
+      const response = await fetch('http://128.61.15.40:3000/transcribe', { //update with your IP ADDRESS
         method: 'POST',
         body: formData,
         headers: {
