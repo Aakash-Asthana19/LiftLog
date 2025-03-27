@@ -10,17 +10,23 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
+  Alert
 } from 'react-native';
 import { Audio } from 'expo-av';
 import * as mime from 'react-native-mime-types';
 import { FontAwesome } from '@expo/vector-icons';
 import { getAnalytics, isSupported, logEvent } from "firebase/analytics";
 import { getApp } from "firebase/app";
+import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 
-const WorkoutScreen = () => {
+
+
+const WorkoutScreen = ({ navigation }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [recording, setRecording] = useState(null);
   const [transcription, setTranscription] = useState('');
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [workout, setWorkout] = useState({
     exercise: '',
     reps: '',
@@ -90,7 +96,7 @@ const WorkoutScreen = () => {
         name: fileName,
       });
 
-      const response = await fetch('http://128.61.15.40:3000/transcribe', { //update with your IP ADDRESS
+      const response = await fetch('http://128.61.10.126:3000/transcribe', { //update with your IP ADDRESS
         method: 'POST',
         body: formData,
         headers: {
@@ -116,29 +122,73 @@ const WorkoutScreen = () => {
     setWorkout({ ...workout, [name]: value });
   };
 
+  
+  const saveWorkoutToFirebase = async () => {
+    const auth = getAuth();
+    const userId = auth.currentUser ? auth.currentUser.uid : null;
+
+    if (!userId) {
+      console.error('User not logged in');
+      return;
+    }
+
+    const db = getFirestore();
+    const workoutData = {
+      ...workout,
+      userId,
+      date: new Date().toISOString().split('T')[0],
+      timestamp: new Date().toISOString(),
+    };
+
+    try {
+      await addDoc(collection(db, 'workouts'), workoutData);
+      console.log('Workout saved successfully:', workoutData);
+      setSaveSuccess(true);
+      Alert.alert('Success', 'Workout saved successfully! View in Calendar');
+      // Clear the workout data after saving
+      setWorkout({
+        exercise: '',
+        reps: '',
+        sets: '',
+        weight: '',
+      });
+      setTranscription('');
+    } catch (error) {
+      console.error('Error saving workout:', error);
+      Alert.alert('Error', 'Failed to save workout. Please try again.');
+    }
+  };
+
   const parseVoiceInput = (input) => {
     if (!input) return; // Check if input is not null or undefined
-
+  
     const lowerInput = input.toLowerCase();
-
-    //command must be said in a certain way as of now
-    const exerciseRegex = /([a-zA-Z\s]+)(?=\d+\sreps|set|pounds)/; //get exercise name before reps, set, or pounds
-    const repsRegex = /(\d+)\sreps/; //get number followed by "reps"
-    const setRegex = /set\s(\d+)/; //get number after "set"
-    const weightRegex = /(\d+)\spounds/; //get number followed by "pounds"
-
+  
+    // Regex patterns
+    const exerciseRegex = /([a-zA-Z\s]+)(?=\d+\sreps|set|pounds)/; // Capture exercise name before reps, set, or pounds
+    const repsRegex = /(\d+)\sreps/; // Capture number followed by "reps"
+    const setRegex = /set\s(\d+)/; // Capture number after "set"
+    const weightRegex = /(\d+)\spounds/; // Capture number followed by "pounds"
+  
     const exerciseMatch = lowerInput.match(exerciseRegex);
     const repsMatch = lowerInput.match(repsRegex);
     const setMatch = lowerInput.match(setRegex);
     const weightMatch = lowerInput.match(weightRegex);
-
+  
     setWorkout({
       exercise: exerciseMatch ? exerciseMatch[1].trim() : workout.exercise,
       reps: repsMatch ? repsMatch[1] : workout.reps,
       sets: setMatch ? setMatch[1] : workout.sets,
       weight: weightMatch ? weightMatch[1] : workout.weight,
     });
+
+    // Remove the automatic saving
+    // setTimeout(() => {
+    //   saveWorkoutToFirebase();
+    // }, 100);
   };
+  
+  
 
   return (
     <KeyboardAvoidingView
@@ -202,6 +252,21 @@ const WorkoutScreen = () => {
               color="white"
             />
           </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.saveButton}
+            onPress={saveWorkoutToFirebase}
+          >
+            <Text style={styles.buttonText}>Save Workout</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.calendarButton}
+            onPress={() => navigation.navigate('Calendar')}
+          >
+            <Text style={styles.buttonText}>View Calendar</Text>
+          </TouchableOpacity>
+
 
           {transcription && (
             <View style={styles.transcriptionContainer}>
@@ -281,6 +346,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#555',
     textAlign: 'center',
+  },
+  calendarButton: {
+    backgroundColor: '#5dade2',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 80,
+  },
+  buttonText: {
+    color: 'white',
+    textAlign: 'center',
+  },
+  saveButton: {
+    backgroundColor: '#5dade2',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 20,
   },
 });
 

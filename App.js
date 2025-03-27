@@ -6,6 +6,7 @@ import { logEvent } from "firebase/analytics";
 import { getAuth, onAuthStateChanged } from 'firebase/auth'; // Import Firebase Auth
 import WorkoutScreen from './src/Screens/WorkoutScreen.js';
 import LogInScreen from './src/Screens/LogInScreen.js';
+import CalendarScreen from './src/Screens/CalendarScreen';
 
 const Stack = createStackNavigator();
 
@@ -42,7 +43,8 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator initialRouteName={user ? 'Workout' : 'LogIn'}>
         <Stack.Screen name="LogIn" component={LogInScreen} />
-        <Stack.Screen name="Workout" component={WorkoutScreen} />
+        <Stack.Screen name="Workout" component={WorkoutScreen} options={({ navigation }) => ({})}/>
+        <Stack.Screen name="Calendar" component={CalendarScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
