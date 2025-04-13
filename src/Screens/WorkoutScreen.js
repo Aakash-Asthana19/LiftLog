@@ -16,6 +16,7 @@ import { Audio } from 'expo-av';
 import { FontAwesome } from '@expo/vector-icons';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
+import { serverTimestamp } from 'firebase/firestore';
 
 
 // Add these utility functions at the top of the file
@@ -119,7 +120,7 @@ const WorkoutScreen = ({ navigation }) => {
       Alert.alert('Error', 'You must be logged in to save workouts');
       return;
     }
-
+  
     const db = getFirestore();
     try {
       for (const set of workout.sets) {
@@ -128,10 +129,9 @@ const WorkoutScreen = ({ navigation }) => {
           exercise: workout.exercise,
           userId,
           date: new Date().toISOString().split('T')[0],
-          timestamp: new Date().toISOString()
+          timestamp: serverTimestamp() // Changed from new Date().toISOString()
         });
       }
-      
       Alert.alert('Success', 'Workout saved!');
       setWorkout({ exercise: '', sets: [{ reps: '', weight: '' }] });
       setTranscription('');

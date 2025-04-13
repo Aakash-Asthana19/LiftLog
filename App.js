@@ -7,6 +7,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth'; // Import Firebase 
 import WorkoutScreen from './src/Screens/WorkoutScreen.js';
 import LogInScreen from './src/Screens/LogInScreen.js';
 import CalendarScreen from './src/Screens/CalendarScreen';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const Stack = createStackNavigator();
 
@@ -40,12 +41,15 @@ export default function App() {
   }, []);
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName={user ? 'Workout' : 'LogIn'}>
-        <Stack.Screen name="LogIn" component={LogInScreen} />
-        <Stack.Screen name="Workout" component={WorkoutScreen} options={({ navigation }) => ({})}/>
-        <Stack.Screen name="Calendar" component={CalendarScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <GestureHandlerRootView style={{ flex: 1 }}>    
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName={user ? 'Workout' : 'LogIn'}>
+          <Stack.Screen name="LogIn" component={LogInScreen} />
+          <Stack.Screen name="Workout" component={WorkoutScreen} options={({ navigation }) => ({})}/>
+          <Stack.Screen name="Calendar" component={CalendarScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </GestureHandlerRootView>
+
   );
 }
