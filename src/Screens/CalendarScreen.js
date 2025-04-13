@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
@@ -7,14 +7,43 @@ import { FontAwesome } from '@expo/vector-icons';
 
 
 const CalendarScreen = () => {
-  const today = new Date().toISOString().split('T')[0];
-  const [selectedDate, setSelectedDate] = useState(today);
+  // const calendarRef = useRef(null);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [workouts, setWorkouts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [markedDates, setMarkedDates] = useState({});
 
   useEffect(() => {
+    fetchWorkoutDates();
     fetchWorkoutsForDate(selectedDate);
   }, []);
+
+  const fetchWorkoutDates = async () => {
+    const auth = getAuth();
+    const userId = auth.currentUser?.uid;
+    if (!userId) return;
+
+    const db = getFirestore();
+    const workoutsRef = collection(db, 'workouts');
+    const q = query(workoutsRef, where('userId', '==', userId));
+
+    const querySnapshot = await getDocs(q);
+    const dates = querySnapshot.docs.reduce((acc, doc) => {
+      const date = doc.data().date;
+      acc[date] = { marked: true, dotColor: '#2ecc71' };
+      return acc;
+    }, {});
+
+    // Add current date selection
+    dates[selectedDate] = { 
+      selected: true, 
+      selectedColor: '#2ecc71',
+      selectedTextColor: 'white',
+      dotColor: '#2ecc71'
+    };
+
+    setMarkedDates(dates);
+  };
 
   const fetchWorkoutsForDate = async (date) => {
     setIsLoading(true);
@@ -29,27 +58,14 @@ const CalendarScreen = () => {
         where('userId', '==', userId), 
         where('date', '==', date)
       );
-  
+
+      
       const querySnapshot = await getDocs(q);
-      const workoutsData = querySnapshot.docs.map(doc => {
-        const data = doc.data();
-        
-        // Handle both timestamp formats
-        let timestamp;
-        if (data.timestamp?.toDate) {
-          timestamp = data.timestamp.toDate(); // New format (Timestamp)
-        } else if (typeof data.timestamp === 'string') {
-          timestamp = new Date(data.timestamp); // Old format (ISO string)
-        } else {
-          timestamp = null;
-        }
-  
-        return {
-          id: doc.id,
-          ...data,
-          timestamp: timestamp
-        };
-      });
+      const workoutsData = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        timestamp: doc.data().timestamp?.toDate?.() || new Date()
+      }));
 
       
       const groupedWorkouts = workoutsData.reduce((acc, workout) => {  // Group workouts by exercise and sort by timestamp
@@ -101,25 +117,64 @@ const CalendarScreen = () => {
     }, 0);
   };
 
+  const handleDayPress = async (day) => {
+    const newMarkedDates = { ...markedDates };
+    
+    // Remove previous selection
+    Object.keys(newMarkedDates).forEach(date => {
+      if (newMarkedDates[date].selected) {
+        delete newMarkedDates[date].selected;
+      }
+    });
+    
+    // Add new selection
+    newMarkedDates[day.dateString] = {
+      ...newMarkedDates[day.dateString],
+      selected: true,
+      selectedColor: '#2ecc71',
+      selectedTextColor: 'white'
+    };
+
+    setSelectedDate(day.dateString);
+    setMarkedDates(newMarkedDates);
+    await fetchWorkoutsForDate(day.dateString);
+  };
+
+  const handleTodayPress = () => {
+    const today = new Date().toISOString().split('T')[0];
+    // calendarRef.current?.setSelectedDate(today);
+    setSelectedDate(today);
+    fetchWorkoutsForDate(today);
+    
+    // Update marked dates
+    const newMarkedDates = { ...markedDates };
+    Object.keys(newMarkedDates).forEach(date => {
+      if (newMarkedDates[date].selected) {
+        delete newMarkedDates[date].selected;
+      }
+    });
+    newMarkedDates[today] = {
+      ...newMarkedDates[today],
+      selected: true,
+      selectedColor: '#2ecc71',
+      selectedTextColor: 'white'
+    };
+    setMarkedDates(newMarkedDates);
+  };
+
   return (
     <View style={styles.container}>
       <Calendar
+        // ref={calendarRef}
         current={selectedDate}
-        onDayPress={async (day) => {
-          setSelectedDate(day.dateString);
-          await fetchWorkoutsForDate(day.dateString);
-        }}
-        markedDates={{
-          [selectedDate]: {
-            selected: true,
-            selectedColor: '#2ecc71',
-            selectedTextColor: 'white'
-          }
-        }}
+        onDayPress={handleDayPress}
+        markedDates={markedDates}
         theme={{
           calendarBackground: '#ffffff',
           selectedDayBackgroundColor: '#2ecc71',
+          selectedDayTextColor: 'white',
           todayTextColor: '#2ecc71',
+          todayBackgroundColor: 'rgba(46, 204, 113, 0.1)',
           dayTextColor: '#2d3436',
           textDisabledColor: '#d3d3d3',
           arrowColor: '#2ecc71',
@@ -132,6 +187,10 @@ const CalendarScreen = () => {
           textDayHeaderFontSize: 14
         }}
       />
+
+      <TouchableOpacity style={styles.todayButton} onPress={handleTodayPress}>
+        <Text style={styles.todayButtonText}>Go to Today</Text>
+      </TouchableOpacity>
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {isLoading ? (
@@ -164,7 +223,6 @@ const CalendarScreen = () => {
               <View key={index} style={styles.exerciseCard}>
                 <View style={styles.exerciseHeader}>
                   <Text style={styles.exerciseName}>{exercise.exercise}</Text>
-                  <FontAwesome name="chevron-right" size={16} color="#666" />
                 </View>
 
                 <View style={styles.statsContainer}>
@@ -204,6 +262,40 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
+    padding: 15,
+  },
+  todayButton: {
+    backgroundColor: '#2ecc71',
+    paddingVertical: 10,
+    marginVertical: 15,
+    borderRadius: 25,
+    alignSelf: 'center',
+    paddingHorizontal: 25,
+  },
+  todayButtonText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  calendarHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 15,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  calendarTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#2d3436',
+  },
+  exerciseHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
   },
   scrollContainer: {
     padding: 20,

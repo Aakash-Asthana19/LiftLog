@@ -422,7 +422,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   recordingButton: {
-    backgroundColor: '#e74c3c',
+    backgroundColor: '#e83523',
   },
   buttonText: {
     color: '#fff',
