@@ -183,7 +183,7 @@ const WorkoutScreen = ({ navigation }) => {
         name: 'audio.wav',
       });
 
-      const response = await fetch('http://128.61.3.45:3000/transcribe', { // Replace with your server's IP address
+      const response = await fetch('https://liftlog-transcription.onrender.com/transcribe', { // Replace with your server's IP address
         method: 'POST',
         body: formData,
         headers: {
