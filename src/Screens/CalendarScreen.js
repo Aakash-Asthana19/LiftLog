@@ -94,7 +94,7 @@ const CalendarScreen = () => {
         return acc;
       }, {});
 
-      // Convert to array and sort by earliest timestamp
+      // Sort by earliest timestamp
       const sortedWorkouts = Object.values(groupedWorkouts)
       .map(exercise => ({
         ...exercise,

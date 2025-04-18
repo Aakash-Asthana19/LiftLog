@@ -19,7 +19,6 @@ import { getAuth } from 'firebase/auth';
 import { serverTimestamp } from 'firebase/firestore';
 
 
-// Add these utility functions at the top of the file
 const numberWordsMap = new Map([
   ['to', 2], ['too', 2], ['two', 2], ['for', 4], ['four', 4], ['tree', 3], ['three', 3]
 ]);
@@ -31,7 +30,7 @@ const normalizeNumbers = (input) => {
 };
 
 const parseSetNumbers = (input) => {
-  return input.replace(/(\d+)(st|nd|rd|th)/gi, '$1'); // Remove ordinal suffixes
+  return input.replace(/(\d+)(st|nd|rd|th)/gi, '$1'); // Remove end suffix so number gets recognized
 };
 
 
@@ -129,7 +128,7 @@ const WorkoutScreen = ({ navigation }) => {
           exercise: workout.exercise,
           userId,
           date: new Date().toISOString().split('T')[0],
-          timestamp: serverTimestamp() // Changed from new Date().toISOString()
+          timestamp: serverTimestamp()
         });
       }
       Alert.alert('Success', 'Workout saved!');
@@ -183,7 +182,7 @@ const WorkoutScreen = ({ navigation }) => {
         name: 'audio.wav',
       });
 
-      const response = await fetch('http://128.61.3.45:3000/transcribe', { // Replace with your server's IP address
+      const response = await fetch('https://liftlog-transcription.onrender.com/transcribe', { // Replace with ur server's IP address (now instead use deployed backend link)
         method: 'POST',
         body: formData,
         headers: {

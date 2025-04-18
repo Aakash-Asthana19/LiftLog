@@ -23,7 +23,7 @@ const LogInScreen = ({ navigation }) => {
             navigation.navigate('Workout'); // Navigate to Workout screen after successful sign-up
         } catch (error) {
             console.error('Error signing up:', error);
-            Alert.alert('Sign Up Error', error.message); // Show error message
+            Alert.alert('Sign Up Error', error.message);
         }
     };
 
@@ -36,7 +36,7 @@ const LogInScreen = ({ navigation }) => {
             navigation.navigate('Workout'); // Navigate to Workout screen after successful login
         } catch (error) {
             console.error('Error logging in:', error);
-            Alert.alert('Login Error', error.message); // Show error message
+            Alert.alert('Login Error', error.message);
         }
     };
 
