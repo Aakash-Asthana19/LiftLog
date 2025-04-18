@@ -19,10 +19,10 @@ const LogInScreen = ({ navigation }) => {
         try {
             const auth = getAuth();
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            console.log('User signed up:', userCredential.user);
+            console.log('User Signed Up:', userCredential.user);
             navigation.navigate('Workout'); // Navigate to Workout screen after successful sign-up
         } catch (error) {
-            console.error('Error signing up:', error);
+            console.error('There was an error signing up:', error);
             Alert.alert('Sign Up Error', error.message); // Show error message
         }
     };
@@ -32,10 +32,10 @@ const LogInScreen = ({ navigation }) => {
         try {
             const auth = getAuth();
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            console.log('User logged in:', userCredential.user);
+            console.log('User Logged In:', userCredential.user);
             navigation.navigate('Workout'); // Navigate to Workout screen after successful login
         } catch (error) {
-            console.error('Error logging in:', error);
+            console.error('There was an error logging in:', error);
             Alert.alert('Login Error', error.message); // Show error message
         }
     };
