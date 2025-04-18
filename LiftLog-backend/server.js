@@ -17,7 +17,7 @@ const upload = multer({ dest: 'uploads/' });
 
 //Google Cloud Speech client
 const client = new speech.SpeechClient({
-  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+  credentials: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON),
 });
 
 //convert m4a to wav

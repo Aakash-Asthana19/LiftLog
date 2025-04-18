@@ -17,7 +17,7 @@ const CalendarScreen = () => {
     fetchWorkoutDates();
     fetchWorkoutsForDate(selectedDate);
   }, []);
-
+  // fetches the snapshots of each workout date
   const fetchWorkoutDates = async () => {
     const auth = getAuth();
     const userId = auth.currentUser?.uid;
@@ -44,7 +44,7 @@ const CalendarScreen = () => {
 
     setMarkedDates(dates);
   };
-
+  
   const fetchWorkoutsForDate = async (date) => {
     setIsLoading(true);
     try {
@@ -110,7 +110,7 @@ const CalendarScreen = () => {
     setIsLoading(false);
   }
 };
-
+  // calculates total volume of that current workout
   const getTotalVolume = () => {
     return workouts.reduce((total, exercise) => {
       return total + exercise.sets.reduce((sum, set) => sum + (set.reps * set.weight), 0);
@@ -139,7 +139,7 @@ const CalendarScreen = () => {
     setMarkedDates(newMarkedDates);
     await fetchWorkoutsForDate(day.dateString);
   };
-
+  // fetches the workouts for the specific date
   const handleTodayPress = () => {
     const today = new Date().toISOString().split('T')[0];
     // calendarRef.current?.setSelectedDate(today);
