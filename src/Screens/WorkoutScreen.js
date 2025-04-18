@@ -110,7 +110,7 @@ const WorkoutScreen = ({ navigation }) => {
     });
   };
     
-
+  // saves workout data
   const saveWorkoutToFirebase = async () => {
     const auth = getAuth();
     const userId = auth.currentUser?.uid;
@@ -119,7 +119,8 @@ const WorkoutScreen = ({ navigation }) => {
       Alert.alert('Error', 'You must be logged in to save workouts');
       return;
     }
-  
+
+    // gets workout data
     const db = getFirestore();
     try {
       for (const set of workout.sets) {
@@ -182,7 +183,7 @@ const WorkoutScreen = ({ navigation }) => {
         name: 'audio.wav',
       });
 
-      const response = await fetch('https://liftlog-transcription.onrender.com/transcribe', { // Replace with ur server's IP address (now instead use deployed backend link)
+      const response = await fetch('https://liftlog-transcription.onrender.com/transcribe', { // Replace with ur server's IP address, now instead use deployed backend link
         method: 'POST',
         body: formData,
         headers: {
