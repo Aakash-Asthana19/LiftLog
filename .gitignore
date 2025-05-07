@@ -35,5 +35,8 @@ yarn-error.*
 # Google Cloud Credentials
 /config/google-credentials.json
 
+# Firebase Credentials
+/config/firebase-credentials.json
+
 # typescript
 *.tsbuildinfo
