@@ -17,8 +17,24 @@ LiftLog is a cross-platform fitness tracking application that allows users to lo
 
 ## Screenshots
 
-<!-- Add your own screenshots here -->
+### 📱 Login Screen
+![Login Screen](screenshots/login.png)
 
+### 🏠 Home Screen
+![Home Screen](screenshots/workoutscreen.png)
+
+### 🎙️ Voice Logging
+![Voice Logging](screenshots/recording.png)
+
+### 🗓️ Calendar View
+![Calendar View](screenshots/calendar.png)
+
+---
+
+## Video Demo
+
+### Video
+[![Watch Demo](screenshots/video.png)](https://drive.google.com/file/d/1Ss6_1RbKVhWqRHmfdptFFyvjViw_d_4m/view?resourcekey)
 ---
 
 ## Tech Stack
