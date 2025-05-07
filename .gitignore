@@ -33,10 +33,10 @@ yarn-error.*
 .env*
 
 # Google Cloud Credentials
-/config/google-credentials.json
+/LiftLog-backend/config/google-credentials.json
 
 # Firebase Credentials
-/config/firebase-credentials.json
+/LiftLog-backend/config/firebase-credentials.json
 
 # typescript
 *.tsbuildinfo
