@@ -36,26 +36,26 @@ LiftLog is a cross-platform fitness tracking application that allows users to lo
 
 ### Backend
 
-cd LiftLog-backend
-npm install
+`cd LiftLog-backend`
+`npm install`
 
 
 ### Frontend
 
-npm install
+`npm install`
 
 # Usage
 
 ## Start the Backend
 
-cd LiftLog-backend
-node server.js
+`cd LiftLog-backend`
+`node server.js`
 
 
 ## Start the Frontend
 
 Download the ExpoGO App on your mobile device
-npx expo start
+`npx expo start`
 Scan the generated QR Code
 
 
@@ -70,12 +70,3 @@ Scan the generated QR Code
 ## Environment Variables & Security
 
 - All secrets and keys for services used in this project have been disabled.
-
----
-
-
-## License
-
-[MIT](LICENSE)
-
----
